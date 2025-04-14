@@ -2,13 +2,21 @@ import express, { Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import bcrypt from "bcrypt";
+import { CreateUserScheam } from "@repo/common/types";
+
+
 const app = express();
-
-
 app.use(express.json());
 
 
 app.post("/signup", (req: Request, res : Response) => {
+    const data = CreateUserScheam.safeParse(req.body);
+    if(!data.seccess){
+         res.json({
+            message : "Incorrect Input"
+        })
+        return;
+    }
     const {username, email, password } = req.body;
 
     const findUser = new UserModel.findOne({
