@@ -3,7 +3,7 @@ import { JWT_SECRET } from "@repo/backend-common/config";
 import jwt from "jsonwebtoken";
 
 
-export function Middleware(req : Request, res : Response, next : NextFunction) {
+export function middleware(req : Request, res : Response, next : NextFunction) {
     try {
         
         const token = req.headers["authorization"] ?? "";
@@ -11,7 +11,7 @@ export function Middleware(req : Request, res : Response, next : NextFunction) {
 
     if(decode){
         "@tsignore"
-        res.locals.userId = decode;
+        res.locals.userId = decode.userId
     }
     else {
         res.status(403).json({
