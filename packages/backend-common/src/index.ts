@@ -1,1 +1,1 @@
-export const JWT_SECRET = "ISA22SMA";
+export const JWT_SECRET = process.env.JWT_SECRET || "ISA22SMA";

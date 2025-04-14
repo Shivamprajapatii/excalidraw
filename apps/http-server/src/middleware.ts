@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response} from "express";
-import { JWT_SECRET } from "./config";
+import { JWT_SECRET } from "@repo/backend-common/config";
 import jwt from "jsonwebtoken";
 
 
@@ -7,8 +7,7 @@ export function Middleware(req : Request, res : Response, next : NextFunction) {
     try {
         
         const token = req.headers["authorization"] ?? "";
-
-    const decode = jwt.verify(token, JWT_SECRET) as {userId : String};
+        const decode = jwt.verify(token, JWT_SECRET);
 
     if(decode){
         "@tsignore"
@@ -23,8 +22,8 @@ export function Middleware(req : Request, res : Response, next : NextFunction) {
     next(); 
 
     } catch (error) {
-        res.send.json({
-            
+        res.send({
+            error :"Erorro found"
         })
     }
 }
