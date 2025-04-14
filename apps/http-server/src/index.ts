@@ -2,7 +2,7 @@ import express, { Request, Response} from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import bcrypt from "bcrypt";
-import { CreateUserScheam } from "@repo/common/types";
+import { CreateUserSchema, SignInSchema, CreateRommSchema } from "@repo/common/types";
 
 
 const app = express();
@@ -10,8 +10,8 @@ app.use(express.json());
 
 
 app.post("/signup", (req: Request, res : Response) => {
-    const data = CreateUserScheam.safeParse(req.body);
-    if(!data.seccess){
+    const data = CreateUserSchema.safeParse(req.body);
+    if(!data.success){
          res.json({
             message : "Incorrect Input"
         })
@@ -43,6 +43,14 @@ app.post("/signup", (req: Request, res : Response) => {
 });
 
 app.post("/signin", (req : Request, res : Response ) => {
+    const data = SignInSchema.safeParse(req.body);
+    if(!data.success){
+         res.json({
+            message : "Incorrect Input"
+        })
+        return;
+    }
+
     const {username, password } = req.body;
     
 
