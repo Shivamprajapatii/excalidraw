@@ -20,14 +20,14 @@ app.post("/signup", (req: Request, res : Response) => {
     }
     const {username, email, password } = req.body;
 
-    const findUser = new prismaClient.findOne({
+    const findUser = new prismaClient.User.findOne({
         email
     });
 
     const hashPassowrd = bcrypt.hash(password,10);
 
     if(!findUser){
-        const data = new UserModel.create({
+        const data = new prismaClient.create({
             username,
             email,
             hashPassowrd
@@ -55,7 +55,7 @@ app.post("/signin", (req : Request, res : Response ) => {
     const {username, password } = req.body;
     
 
-    const user = new UserModel.find({
+    const user = new prismaClient.find({
         username,
     });
 

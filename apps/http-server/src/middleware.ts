@@ -11,7 +11,7 @@ export function Middleware(req : Request, res : Response, next : NextFunction) {
 
     if(decode){
         "@tsignore"
-        res.locals.userId = decode.userId
+        res.locals.userId = decode;
     }
     else {
         res.status(403).json({
