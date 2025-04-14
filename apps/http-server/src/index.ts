@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import bcrypt from "bcrypt";
 import { CreateUserSchema, SignInSchema, CreateRommSchema } from "@repo/common/types";
+import { prismaClient } from "@repo/db/client";
 
 
 const app = express();
@@ -19,7 +20,7 @@ app.post("/signup", (req: Request, res : Response) => {
     }
     const {username, email, password } = req.body;
 
-    const findUser = new UserModel.findOne({
+    const findUser = new prismaClient.findOne({
         email
     });
 
