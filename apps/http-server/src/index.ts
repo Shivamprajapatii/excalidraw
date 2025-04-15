@@ -15,104 +15,128 @@ app.post("/signup", async (req: Request, res: Response) => {
     try {
         const parseData = CreateUserSchema.safeParse(req.body);
 
-    if (!parseData.success) {
-        res.json({
-            message: "Incorrect Input"
-        })
-        return;
-    }
-    const responce = await prismaClient.user.findFirst({
-        where : {
-            email : parseData.data.email
+        if (!parseData.success) {
+            res.json({
+                message: "Incorrect Input"
+            })
+            return;
         }
-    });
-
-    if(responce){
-        res.json({
-            message : "User already exists with this email"
+        const responce = await prismaClient.user.findFirst({
+            where: {
+                email: parseData.data.email
+            }
         });
-        return ;
-    };
 
-    const hashPassowrd = await bcrypt.hash(parseData.data.password, 10);
+        if (responce) {
+            res.json({
+                message: "User already exists with this email"
+            });
+            return;
+        };
 
-    const user = await prismaClient.user.create({
-        data: {
-            email : parseData.data.email,
-            name : parseData.data.username,
-            password: hashPassowrd
-        }
-    });
-    res.json({
-        message : "User Signup Successfull!",
-        user
-    })
+        const hashPassowrd = await bcrypt.hash(parseData.data.password, 10);
+
+        const user = await prismaClient.user.create({
+            data: {
+                email: parseData.data.email,
+                name: parseData.data.username,
+                password: hashPassowrd
+            }
+        });
+        res.json({
+            message: "User Signup Successfull!",
+            user
+        })
 
     } catch (error) {
         res.json({
-            message : "Error Occur while signup",
+            message: "Error Occur while signup",
             error
         })
     };
-    
+
 });
 
 app.post("/signin", async (req: Request, res: Response) => {
-    const parseData = SignInSchema.safeParse(req.body);
-    console.log(parseData);
+    try {
 
-    if (!parseData.success) {
-        res.json({
-            message: "Incorrect Input"
-        })
-        return;
-    }
+        const parseData = SignInSchema.safeParse(req.body);
 
-    const user = await prismaClient.user.findFirst({
-        where :{
-            name : parseData.data.username
+        if (!parseData.success) {
+            res.json({
+                message: "Incorrect Input"
+            })
+            return;
         }
-    });
 
-    if(!user){
-        res.json({
-            message : "User not Exists or Wrong Details"
-        })
-        return;
-    }
-    //@ts-ignore
-    const checkPassword = await bcrypt.compare(parseData.data.password, user.password);
+        const user = await prismaClient.user.findFirst({
+            where: {
+                email: parseData.data.email,
+            }
+        });
 
-    if (!checkPassword) {
-        res.status(400).json({
-            message: "Wront Details or User Not Exist"
-        })
-        return ;
-    };
-
-    const token = jwt.sign({
+        if (!user) {
+            res.json({
+                message: "User not Exists or Wrong Details"
+            })
+            return;
+        }
         //@ts-ignore
-        userId: user.id
-    }, JWT_SECRET);
+        const checkPassword = await bcrypt.compare(parseData.data.password, user.password);
 
-    res.json({
-        message: "User Signin successful",
-        token
-    });
+        if (!checkPassword) {
+            res.status(400).json({
+                message: "Wront Details or User Not Exist"
+            })
+            return;
+        };
+
+        const token = jwt.sign({
+            userId: user?.id
+        }, JWT_SECRET);
+
+        res.json({
+            message: "User Signin successful",
+            token
+        });
+
+    } catch (error) {
+        res.json({
+            message: "Error While SignIn",
+            error
+        })
+    }
 });
 
-app.post("/room", middleware, (req, res) => {
-    const data = CreateRommSchema.safeParse(req.body);
-    if (!data.success) {
+app.post("/room", middleware, async (req, res) => {
+
+    const parseData = CreateRommSchema.safeParse(req.body);
+    if (!parseData.success) {
         res.json({
             message: "Wrong Details Input!"
         });
         return;
     };
-    //db call
-    res.json({
-        roomId: 123
-    });
+    //@ts-ignores
+    const userId = req.userId;
+    try {
+        const roomData = await prismaClient.room.create({
+            data: {
+                slug: parseData.data.name,
+                adminId: userId
+            }
+        });
+
+        res.json({
+            roomId: roomData.id
+        });
+
+    } catch (error) {
+        res.json({
+            message: "Room already exists with this name",
+            error
+        })
+    };
 
 });
 

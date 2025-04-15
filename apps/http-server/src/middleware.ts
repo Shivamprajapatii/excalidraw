@@ -10,8 +10,8 @@ export function middleware(req : Request, res : Response, next : NextFunction) {
         const decode = jwt.verify(token, JWT_SECRET);
 
     if(decode){
-        "@tsignore"
-        res.locals.userId = decode;
+        //@ts-ignore
+        req.userId = decode.userId;
     }
     else {
         res.status(403).json({
