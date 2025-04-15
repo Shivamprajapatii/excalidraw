@@ -12,7 +12,8 @@ app.use(express.json());
 
 
 app.post("/signup", async (req: Request, res: Response) => {
-    const parseData = CreateUserSchema.safeParse(req.body);
+    try {
+        const parseData = CreateUserSchema.safeParse(req.body);
 
     if (!parseData.success) {
         res.json({
@@ -20,6 +21,19 @@ app.post("/signup", async (req: Request, res: Response) => {
         })
         return;
     }
+
+    const responce = await prismaClient.user.findFirst({
+        where : {
+            email : parseData.data.email
+        }
+    });
+
+    if(!responce){
+        res.json({
+            message : "User already exists with this email"
+        });
+        return ;
+    };
 
     const hashPassowrd = await bcrypt.hash(parseData.data.password, 10);
 
@@ -34,6 +48,13 @@ app.post("/signup", async (req: Request, res: Response) => {
         message : "User Signup Successfull!",
         user
     })
+
+    } catch (error) {
+        res.json({
+            message : "Error Occur while signup",
+            error
+        })
+    };
     
 });
 
