@@ -21,14 +21,13 @@ app.post("/signup", async (req: Request, res: Response) => {
         })
         return;
     }
-
     const responce = await prismaClient.user.findFirst({
         where : {
             email : parseData.data.email
         }
     });
 
-    if(!responce){
+    if(responce){
         res.json({
             message : "User already exists with this email"
         });
@@ -40,7 +39,7 @@ app.post("/signup", async (req: Request, res: Response) => {
     const user = await prismaClient.user.create({
         data: {
             email : parseData.data.email,
-            name : parseData.data.name,
+            name : parseData.data.username,
             password: hashPassowrd
         }
     });
@@ -60,6 +59,7 @@ app.post("/signup", async (req: Request, res: Response) => {
 
 app.post("/signin", async (req: Request, res: Response) => {
     const parseData = SignInSchema.safeParse(req.body);
+    console.log(parseData);
 
     if (!parseData.success) {
         res.json({
@@ -70,18 +70,24 @@ app.post("/signin", async (req: Request, res: Response) => {
 
     const user = await prismaClient.user.findFirst({
         where :{
-            email : parseData.data.username,
-            password : parseData.data.password
+            name : parseData.data.username
         }
     });
 
+    if(!user){
+        res.json({
+            message : "User not Exists or Wrong Details"
+        })
+        return;
+    }
     //@ts-ignore
-    const checkPassword = await bcrypt.compare(password, user.password);
+    const checkPassword = await bcrypt.compare(parseData.data.password, user.password);
 
-    if (!user) {
+    if (!checkPassword) {
         res.status(400).json({
             message: "Wront Details or User Not Exist"
         })
+        return ;
     };
 
     const token = jwt.sign({

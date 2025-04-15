@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const CreateUserSchema = z.object({
-    name : z.string(),
+    username : z.string(),
     email : z.string(),
     password : z.string(),
-    photo : z.string()
+    photo : z.string().optional()
 });
 
 export const SignInSchema = z.object({
